@@ -819,28 +819,33 @@ export function ModernIncandescentPuzzle() {
                 <h3 className="mb-6 text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent text-center">
                   Quantum Control Matrix
                 </h3>
-                <div className="grid grid-cols-3 gap-6">
-                  {[0, 1, 2].map((index) => (
-                    <TooltipProvider key={index}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="flex justify-center">
-                            <ModernSwitch
-                              isOn={switchStates[index]}
-                              disabled={gamePhase !== "playing"}
-                              label={`Matrix ${index + 1}`}
-                              onClick={() => toggleSwitch(index)}
-                            />
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="bottom">
-                          {gamePhase !== "playing"
-                            ? "Quantum matrices locked during analysis phase"
-                            : "Toggle quantum control matrix"}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))}
+                <div className="grid grid-cols-3 gap-8">
+                  {[0, 1, 2].map((index) => {
+                    const colors = ["blue", "green", "purple"];
+                    return (
+                      <TooltipProvider key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex justify-center">
+                              <ModernSwitch
+                                isOn={switchStates[index]}
+                                disabled={gamePhase !== "playing"}
+                                label={`Matrix ${index + 1}`}
+                                onClick={() => toggleSwitch(index)}
+                                glowColor={colors[index]}
+                                size="lg"
+                              />
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent side="bottom">
+                            {gamePhase !== "playing"
+                              ? "Quantum matrices locked during analysis phase"
+                              : "Toggle quantum control matrix"}
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
