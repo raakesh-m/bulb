@@ -20,7 +20,7 @@ export function IncandescantPuzzle() {
   // Game state
   const [correctSwitch, setCorrectSwitch] = useState<number | null>(null);
   const [switchStates, setSwitchStates] = useState([false, false, false]);
-  const [bulbState, setBulbState] = useState("off"); // "off", "on", "warm"
+  const [bulbState, setBulbState] = useState<"off" | "on" | "warm">("off");
   const [isCovered, setIsCovered] = useState(true);
   const [gameStarted, setGameStarted] = useState(false);
   const [gameEnded, setGameEnded] = useState(false);

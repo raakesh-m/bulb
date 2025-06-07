@@ -139,7 +139,7 @@ function ModernLightBulb({
     <div className="relative">
       <motion.div
         className={cn(
-          "relative h-24 w-24 rounded-full transition-all duration-500",
+          "relative h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 rounded-full transition-all duration-500",
           state === "on" && "shadow-2xl shadow-yellow-400/50",
           state === "warm" && "shadow-lg shadow-orange-400/30"
         )}
@@ -155,7 +155,7 @@ function ModernLightBulb({
         {/* Bulb Body */}
         <div
           className={cn(
-            "h-full w-full rounded-full border-4 transition-all duration-500",
+            "h-full w-full rounded-full border-2 sm:border-3 lg:border-4 transition-all duration-500",
             state === "off" && "bg-gray-700 border-gray-600",
             state === "on" &&
               "bg-gradient-to-br from-yellow-200 to-yellow-400 border-yellow-300",
@@ -184,7 +184,7 @@ function ModernLightBulb({
           )}
 
           {/* Filament */}
-          <div className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2">
+          <div className="absolute left-1/2 top-1/2 h-6 w-6 sm:h-7 sm:w-7 lg:h-8 lg:w-8 -translate-x-1/2 -translate-y-1/2">
             <div
               className={cn(
                 "h-full w-full rounded-full border-2 border-dashed transition-all duration-500",
@@ -197,7 +197,7 @@ function ModernLightBulb({
         </div>
 
         {/* Base */}
-        <div className="absolute -bottom-1 left-1/2 h-3 w-6 -translate-x-1/2 rounded-b-lg bg-gray-600 border-2 border-gray-700" />
+        <div className="absolute -bottom-1 left-1/2 h-2 w-4 sm:h-2.5 sm:w-5 lg:h-3 lg:w-6 -translate-x-1/2 rounded-b-lg bg-gray-600 border-2 border-gray-700" />
       </motion.div>
 
       {/* Warm Progress Ring */}
@@ -246,7 +246,7 @@ function CustomSwitch({
   };
 
   return (
-    <div className="flex flex-col items-center space-y-3">
+    <div className="flex flex-col items-center space-y-2 sm:space-y-3">
       <motion.label
         className="relative cursor-pointer"
         whileTap={!disabled ? { scale: 0.95 } : {}}
@@ -260,7 +260,7 @@ function CustomSwitch({
         />
         <div
           className={cn(
-            "relative w-24 h-11 rounded-md border-2 border-black transition-all duration-400",
+            "relative w-20 h-9 sm:w-22 sm:h-10 lg:w-24 lg:h-11 rounded-md border-2 border-black transition-all duration-400",
             "bg-black",
             isOn
               ? "shadow-[inset_0px_0px_1px_0px_rgba(0,0,0,1),inset_-85px_0px_50px_-50px_rgba(1,78,4,0.6)]"
@@ -275,13 +275,13 @@ function CustomSwitch({
         >
           <motion.div
             className={cn(
-              "absolute top-0.5 bottom-0.5 left-0.5 w-8 rounded-sm border border-gray-600",
+              "absolute top-0.5 bottom-0.5 left-0.5 w-6 sm:w-7 lg:w-8 rounded-sm border border-gray-600",
               "bg-gradient-to-b from-gray-800 to-gray-900",
               "flex items-center justify-around",
               "shadow-[0px_10px_5px_1px_rgba(0,0,0,0.15)]"
             )}
             animate={{
-              x: isOn ? "58px" : "0px",
+              x: isOn ? "50px" : "0px",
               boxShadow: isOn
                 ? "0px 10px 5px 1px rgba(0, 0, 0, 0.15), inset -10px 0px 10px -5px rgba(1, 112, 4, 0.1)"
                 : "0px 10px 5px 1px rgba(0, 0, 0, 0.15), inset 10px 0px 10px -5px rgba(126, 4, 4, 0.1)",
@@ -318,7 +318,7 @@ function CustomSwitch({
 
       <Badge
         variant={isOn ? "default" : "secondary"}
-        className="text-xs bg-gray-800 text-gray-300 border-gray-700"
+        className="text-xs sm:text-sm bg-gray-800 text-gray-300 border-gray-700"
       >
         {label}
       </Badge>
@@ -607,55 +607,55 @@ export function ModernIncandescentPuzzle() {
           >
             <Card className="mb-4 bg-gray-800 border-gray-700 h-full">
               <CardContent className="p-8">
-                <h2 className="text-3xl font-semibold mb-6 text-center text-white">
+                <h2 className="text-2xl sm:text-3xl font-semibold mb-4 sm:mb-6 text-center text-white">
                   How to Play
                 </h2>
 
-                <div className="grid md:grid-cols-3 gap-8 mb-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-6 sm:mb-8">
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Zap className="h-10 w-10 text-white" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <Zap className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                     </div>
-                    <h3 className="font-semibold mb-3 text-white text-xl">
+                    <h3 className="font-semibold mb-2 sm:mb-3 text-white text-lg sm:text-xl">
                       1. Experiment
                     </h3>
-                    <p className="text-gray-300 text-lg">
+                    <p className="text-gray-300 text-sm sm:text-base lg:text-lg">
                       Toggle the switches to test which one controls the hidden
                       light bulb
                     </p>
                   </div>
 
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Eye className="h-10 w-10 text-white" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <Eye className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                     </div>
-                    <h3 className="font-semibold mb-3 text-white text-xl">
+                    <h3 className="font-semibold mb-2 sm:mb-3 text-white text-lg sm:text-xl">
                       2. Reveal
                     </h3>
-                    <p className="text-gray-300 text-lg">
+                    <p className="text-gray-300 text-sm sm:text-base lg:text-lg">
                       Lift the cover to see the bulb's state - lit, warm, or
                       cold
                     </p>
                   </div>
 
                   <div className="text-center">
-                    <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Trophy className="h-10 w-10 text-white" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                      <Trophy className="h-8 w-8 sm:h-10 sm:w-10 text-white" />
                     </div>
-                    <h3 className="font-semibold mb-3 text-white text-xl">
+                    <h3 className="font-semibold mb-2 sm:mb-3 text-white text-lg sm:text-xl">
                       3. Solve
                     </h3>
-                    <p className="text-gray-300 text-lg">
+                    <p className="text-gray-300 text-sm sm:text-base lg:text-lg">
                       Choose which switch you think controls the bulb
                     </p>
                   </div>
                 </div>
 
-                <div className="bg-yellow-900/30 border border-yellow-600/30 rounded-lg p-6 mb-8">
-                  <h4 className="font-semibold text-yellow-400 mb-3 text-xl">
+                <div className="bg-yellow-900/30 border border-yellow-600/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8">
+                  <h4 className="font-semibold text-yellow-400 mb-2 sm:mb-3 text-lg sm:text-xl">
                     💡 Key Insight
                   </h4>
-                  <p className="text-yellow-200 text-lg">
+                  <p className="text-yellow-200 text-sm sm:text-base lg:text-lg">
                     Light bulbs stay warm for a short time after being turned
                     off. Use this to deduce which switch controls the bulb even
                     when it's not currently on!
@@ -663,18 +663,18 @@ export function ModernIncandescentPuzzle() {
                 </div>
 
                 <div className="text-center">
-                  <div className="mb-8">
-                    <label className="block text-lg font-medium text-gray-300 mb-4">
+                  <div className="mb-6 sm:mb-8">
+                    <label className="block text-base sm:text-lg font-medium text-gray-300 mb-3 sm:mb-4">
                       Choose Difficulty
                     </label>
-                    <div className="flex flex-wrap justify-center gap-4">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap justify-center gap-3 sm:gap-4">
                       {(Object.keys(difficultySettings) as Difficulty[]).map(
                         (level) => (
                           <button
                             key={level}
                             onClick={() => setDifficulty(level)}
                             className={cn(
-                              "px-6 py-3 rounded-lg text-lg font-medium transition-all",
+                              "px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base lg:text-lg font-medium transition-all",
                               difficulty === level
                                 ? "bg-blue-600 text-white shadow-md"
                                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -690,9 +690,9 @@ export function ModernIncandescentPuzzle() {
                   <Button
                     size="lg"
                     onClick={startGame}
-                    className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white px-12 py-6 text-xl"
+                    className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white px-8 sm:px-12 py-4 sm:py-6 text-lg sm:text-xl"
                   >
-                    <Play className="mr-3 h-6 w-6" />
+                    <Play className="mr-2 sm:mr-3 h-5 w-5 sm:h-6 sm:w-6" />
                     Start Playing
                   </Button>
                 </div>
@@ -706,120 +706,134 @@ export function ModernIncandescentPuzzle() {
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-2">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-2 sm:p-4 lg:p-6">
         <div className="mx-auto max-w-7xl h-full">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-4 text-center"
+            className="mb-4 sm:mb-6 text-center"
           >
-            <h1 className="text-4xl font-bold text-white mb-3 flex items-center justify-center gap-3">
-              <Lightbulb className="h-10 w-10 text-yellow-500" />
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-3 flex items-center justify-center gap-2 sm:gap-3">
+              <Lightbulb className="h-6 w-6 sm:h-8 sm:w-8 lg:h-10 lg:w-10 text-yellow-500" />
               Light Switch Puzzle
             </h1>
 
-            <div className="flex items-center justify-center gap-8 text-gray-300">
-              <div className="flex items-center gap-2 text-lg">
-                <Timer className="h-5 w-5" />
+            <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 lg:gap-8 text-gray-300">
+              <div className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+                <Timer className="h-4 w-4 sm:h-5 sm:w-5" />
                 <span>{timeElapsed}s</span>
               </div>
               <Badge
                 className={cn(
-                  "text-white text-lg px-4 py-1",
+                  "text-white text-sm sm:text-base lg:text-lg px-2 sm:px-3 lg:px-4 py-1",
                   difficultySettings[difficulty].color
                 )}
               >
                 {difficultySettings[difficulty].name}
               </Badge>
               {currentStreak > 0 && (
-                <div className="flex items-center gap-2 text-lg">
-                  <Star className="h-5 w-5 text-yellow-500" />
+                <div className="flex items-center gap-2 text-sm sm:text-base lg:text-lg">
+                  <Star className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
                   <span>Streak: {currentStreak}</span>
                 </div>
               )}
             </div>
           </motion.div>
 
-          <div className="grid lg:grid-cols-12 gap-4 h-full">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 h-full">
             {/* Game Stats - Left Column */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="lg:col-span-3 space-y-4"
+              className="lg:col-span-3 space-y-4 order-3 lg:order-1"
             >
-              <Card className="bg-gray-800 border-gray-700">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-4 text-center text-white text-lg">
-                    Your Stats
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Success Rate</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {gameStats.totalAttempts > 0
-                          ? Math.round(
-                              (gameStats.correctGuesses /
-                                gameStats.totalAttempts) *
-                                100
-                            )
-                          : 0}
-                        %
-                      </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="font-semibold mb-4 text-center text-white text-base sm:text-lg">
+                      Your Stats
+                    </h3>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          Success Rate
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {gameStats.totalAttempts > 0
+                            ? Math.round(
+                                (gameStats.correctGuesses /
+                                  gameStats.totalAttempts) *
+                                  100
+                              )
+                            : 0}
+                          %
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          High Score
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {gameStats.highScore}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          Best Streak
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {gameStats.streakCount}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          Avg Time
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {gameStats.averageTime}s
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">High Score</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {gameStats.highScore}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Best Streak</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {gameStats.streakCount}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Avg Time</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {gameStats.averageTime}s
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              <Card className="bg-gray-800 border-gray-700">
-                <CardContent className="p-6">
-                  <h3 className="font-semibold mb-4 text-center text-white text-lg">
-                    Difficulty Info
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Warm Time</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {difficultySettings[difficulty].warmTime}s
-                      </span>
+                <Card className="bg-gray-800 border-gray-700">
+                  <CardContent className="p-4 sm:p-6">
+                    <h3 className="font-semibold mb-4 text-center text-white text-base sm:text-lg">
+                      Difficulty Info
+                    </h3>
+                    <div className="space-y-2 sm:space-y-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          Warm Time
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {difficultySettings[difficulty].warmTime}s
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-400 text-sm sm:text-base">
+                          Score Multiplier
+                        </span>
+                        <span className="font-bold text-gray-200 text-sm sm:text-base lg:text-lg">
+                          {difficultySettings[difficulty].multiplier}x
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-gray-400">Score Multiplier</span>
-                      <span className="font-bold text-gray-200 text-lg">
-                        {difficultySettings[difficulty].multiplier}x
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              </div>
 
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-3">
                 <Button
                   variant="outline"
                   onClick={() => setShowInstructions(true)}
                   className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
                   size="lg"
                 >
-                  <HelpCircle className="mr-2 h-5 w-5" />
-                  How to Play
+                  <HelpCircle className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">How to Play</span>
                 </Button>
 
                 <Button
@@ -829,8 +843,8 @@ export function ModernIncandescentPuzzle() {
                   disabled={gamePhase === "intro"}
                   size="lg"
                 >
-                  <RotateCcw className="mr-2 h-5 w-5" />
-                  New Game
+                  <RotateCcw className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+                  <span className="text-sm sm:text-base">New Game</span>
                 </Button>
               </div>
             </motion.div>
@@ -839,12 +853,12 @@ export function ModernIncandescentPuzzle() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="lg:col-span-6 text-center"
+              className="lg:col-span-6 text-center order-1 lg:order-2"
             >
               <Card className="mb-4 bg-gray-800 border-gray-700 h-full">
-                <CardContent className="p-8 flex flex-col justify-center h-full">
+                <CardContent className="p-4 sm:p-6 lg:p-8 flex flex-col justify-center h-full">
                   {/* Light Bulb Container */}
-                  <div className="relative mb-8 flex h-48 w-full items-center justify-center">
+                  <div className="relative mb-6 sm:mb-8 flex h-32 sm:h-40 lg:h-48 w-full items-center justify-center">
                     {/* Light Bulb */}
                     <div className="absolute z-10">
                       <ModernLightBulb
@@ -914,15 +928,15 @@ export function ModernIncandescentPuzzle() {
                   <div className="text-center w-full">
                     {gamePhase === "playing" && (
                       <div className="space-y-4">
-                        <p className="text-gray-300 text-xl">
+                        <p className="text-gray-300 text-base sm:text-lg lg:text-xl">
                           Test the switches, then reveal the bulb
                         </p>
                         <Button
                           size="lg"
                           onClick={liftCover}
-                          className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white shadow-lg px-8 py-4 text-lg"
+                          className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white shadow-lg px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg"
                         >
-                          <Eye className="mr-2 h-6 w-6" />
+                          <Eye className="mr-2 h-5 w-5 sm:h-6 sm:w-6" />
                           Lift Cover
                         </Button>
                       </div>
@@ -982,35 +996,56 @@ export function ModernIncandescentPuzzle() {
                       <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="w-full"
+                        className="w-full max-w-2xl mx-auto"
                       >
-                        <Card className="border-blue-600 bg-gradient-to-br from-blue-900/60 to-purple-900/60">
-                          <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-blue-300 mb-4 text-center">
-                              Which switch controls the bulb?
-                            </h3>
-                            <p className="mb-6 text-gray-300 text-center">
-                              Based on your observations, make your choice
-                            </p>
-                            <div className="grid grid-cols-3 gap-4">
+                        <Card className="border-yellow-600/30 bg-gradient-to-br from-gray-800/95 to-gray-900/95 backdrop-blur-sm shadow-2xl">
+                          <CardContent className="p-6 sm:p-8">
+                            <div className="text-center mb-6 sm:mb-8">
+                              <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-yellow-500/20 rounded-full mb-4">
+                                <Lightbulb className="h-8 w-8 sm:h-10 sm:w-10 text-yellow-400" />
+                              </div>
+                              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                                Which switch controls the bulb?
+                              </h3>
+                              <p className="text-gray-300 text-sm sm:text-base">
+                                Based on your observations, make your choice
+                              </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                               {[0, 1, 2].map((index) => (
-                                <Button
+                                <motion.div
                                   key={index}
-                                  variant="outline"
-                                  size="lg"
-                                  className="h-20 border-blue-500 bg-gray-800/80 text-blue-300 hover:bg-blue-800/30 hover:border-blue-400 transition-all duration-300"
-                                  onClick={() => makeGuess(index)}
+                                  whileHover={{ scale: 1.02 }}
+                                  whileTap={{ scale: 0.98 }}
                                 >
-                                  <div className="text-center">
-                                    <div className="text-xl font-bold mb-1">
-                                      Switch {index + 1}
+                                  <Button
+                                    variant="outline"
+                                    size="lg"
+                                    className="w-full h-24 sm:h-28 border-2 border-gray-600 bg-gradient-to-br from-gray-700/80 to-gray-800/80 text-white hover:border-yellow-500/50 hover:bg-gradient-to-br hover:from-yellow-500/10 hover:to-orange-500/10 hover:shadow-lg hover:shadow-yellow-500/20 transition-all duration-300 group"
+                                    onClick={() => makeGuess(index)}
+                                  >
+                                    <div className="text-center">
+                                      <div className="text-2xl sm:text-3xl font-bold mb-2 group-hover:text-yellow-400 transition-colors">
+                                        {index + 1}
+                                      </div>
+                                      <div className="text-sm sm:text-base font-medium text-gray-300 group-hover:text-yellow-300 transition-colors">
+                                        Switch {index + 1}
+                                      </div>
+                                      <div className="text-xs text-gray-400 group-hover:text-yellow-400 transition-colors mt-1">
+                                        Click to choose
+                                      </div>
                                     </div>
-                                    <div className="text-sm opacity-75">
-                                      Choose
-                                    </div>
-                                  </div>
-                                </Button>
+                                  </Button>
+                                </motion.div>
                               ))}
+                            </div>
+
+                            <div className="mt-6 sm:mt-8 text-center">
+                              <div className="inline-flex items-center gap-2 text-xs sm:text-sm text-gray-400">
+                                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                                Think carefully - you only get one guess!
+                              </div>
                             </div>
                           </CardContent>
                         </Card>
@@ -1025,15 +1060,15 @@ export function ModernIncandescentPuzzle() {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="lg:col-span-3"
+              className="lg:col-span-3 order-2 lg:order-3"
             >
               <Card className="bg-gray-800 border-gray-700 h-full">
-                <CardContent className="p-6 flex flex-col justify-center h-full">
-                  <h3 className="mb-6 text-xl font-bold text-center text-white">
+                <CardContent className="p-4 sm:p-6 flex flex-col justify-center h-full">
+                  <h3 className="mb-4 sm:mb-6 text-lg sm:text-xl font-bold text-center text-white">
                     Control Switches
                   </h3>
 
-                  <div className="space-y-8 flex-1 flex flex-col justify-center">
+                  <div className="grid grid-cols-3 lg:grid-cols-1 gap-4 sm:gap-6 lg:gap-8 flex-1 lg:flex lg:flex-col lg:justify-center">
                     {[0, 1, 2].map((index) => (
                       <div key={index} className="text-center">
                         <CustomSwitch
