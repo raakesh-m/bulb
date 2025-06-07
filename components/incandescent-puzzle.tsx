@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { LightBulb } from "./light-bulb";
-import { Switch } from "./switch";
+import StyledSwitch from "./styled-switch";
 import { Cover } from "./cover";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -425,7 +425,7 @@ export function IncandescantPuzzle() {
                             )}
                             onClick={() => toggleSwitch(index)}
                           >
-                            <Switch
+                            <StyledSwitch
                               isOn={switchStates[index]}
                               disabled={gameEnded}
                               label={`Switch ${index + 1}`}

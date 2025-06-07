@@ -2,26 +2,23 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ModernLightBulb } from "./modern-light-bulb";
-import { ModernSwitch } from "./modern-switch";
-import { ModernCover } from "./modern-cover";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import {
-  Brain,
-  RotateCcw,
   Lightbulb,
-  Trophy,
+  RotateCcw,
   Timer,
-  Target,
-  Zap,
+  Trophy,
   Star,
-  BookOpen,
-  Settings,
+  Zap,
+  Eye,
   Award,
   TrendingUp,
+  Play,
+  HelpCircle,
+  Volume2,
 } from "lucide-react";
 import {
   Tooltip,
@@ -30,15 +27,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-
-// Particle interface for consistent rendering
-interface Particle {
-  id: number;
-  left: number;
-  top: number;
-  duration: number;
-  delay: number;
-}
 
 type Difficulty = "easy" | "medium" | "hard" | "expert";
 type GamePhase = "intro" | "playing" | "revealed" | "completed";
@@ -50,6 +38,314 @@ interface GameStats {
   averageTime: number;
   highScore: number;
   streakCount: number;
+}
+
+// Sound effects helper
+const playClickSound = () => {
+  try {
+    // Create a simple click sound using Web Audio API
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(
+      400,
+      audioContext.currentTime + 0.1
+    );
+
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.1
+    );
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  } catch (error) {
+    // Fallback - no sound if audio context fails
+    console.log("Audio not available");
+  }
+};
+
+const playSuccessSound = () => {
+  try {
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Success melody
+    oscillator.frequency.setValueAtTime(523, audioContext.currentTime); // C5
+    oscillator.frequency.setValueAtTime(659, audioContext.currentTime + 0.1); // E5
+    oscillator.frequency.setValueAtTime(784, audioContext.currentTime + 0.2); // G5
+
+    gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.3
+    );
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
+  } catch (error) {
+    console.log("Audio not available");
+  }
+};
+
+const playErrorSound = () => {
+  try {
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+
+    // Error sound
+    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+    oscillator.frequency.setValueAtTime(150, audioContext.currentTime + 0.1);
+
+    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.2
+    );
+
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.2);
+  } catch (error) {
+    console.log("Audio not available");
+  }
+};
+
+// Modern Light Bulb Component
+function ModernLightBulb({
+  state,
+  warmPercentage = 0,
+}: {
+  state: BulbState;
+  warmPercentage?: number;
+}) {
+  return (
+    <div className="relative">
+      <motion.div
+        className={cn(
+          "relative h-24 w-24 rounded-full transition-all duration-500",
+          state === "on" && "shadow-2xl shadow-yellow-400/50",
+          state === "warm" && "shadow-lg shadow-orange-400/30"
+        )}
+        animate={{
+          scale: state === "on" ? [1, 1.05, 1] : 1,
+        }}
+        transition={{
+          duration: 2,
+          repeat: state === "on" ? Infinity : 0,
+          ease: "easeInOut",
+        }}
+      >
+        {/* Bulb Body */}
+        <div
+          className={cn(
+            "h-full w-full rounded-full border-4 transition-all duration-500",
+            state === "off" && "bg-gray-700 border-gray-600",
+            state === "on" &&
+              "bg-gradient-to-br from-yellow-200 to-yellow-400 border-yellow-300",
+            state === "warm" &&
+              "bg-gradient-to-br from-orange-200 to-orange-400 border-orange-300"
+          )}
+        >
+          {/* Inner Glow */}
+          {state === "on" && (
+            <motion.div
+              className="absolute inset-1 rounded-full bg-gradient-to-br from-yellow-100 to-yellow-300"
+              animate={{
+                opacity: [0.7, 1, 0.7],
+              }}
+              transition={{
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            />
+          )}
+
+          {/* Warm Indicator */}
+          {state === "warm" && (
+            <div className="absolute inset-2 rounded-full bg-gradient-to-br from-orange-200 to-orange-400 opacity-60" />
+          )}
+
+          {/* Filament */}
+          <div className="absolute left-1/2 top-1/2 h-8 w-8 -translate-x-1/2 -translate-y-1/2">
+            <div
+              className={cn(
+                "h-full w-full rounded-full border-2 border-dashed transition-all duration-500",
+                state === "off" && "border-gray-500",
+                state === "on" && "border-yellow-600",
+                state === "warm" && "border-orange-600"
+              )}
+            />
+          </div>
+        </div>
+
+        {/* Base */}
+        <div className="absolute -bottom-1 left-1/2 h-3 w-6 -translate-x-1/2 rounded-b-lg bg-gray-600 border-2 border-gray-700" />
+      </motion.div>
+
+      {/* Warm Progress Ring */}
+      {state === "warm" && warmPercentage > 0 && (
+        <div className="absolute -inset-4">
+          <svg className="h-full w-full -rotate-90" viewBox="0 0 36 36">
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="2"
+              strokeOpacity="0.3"
+            />
+            <path
+              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="2"
+              strokeDasharray={`${warmPercentage}, 100`}
+              className="transition-all duration-300"
+            />
+          </svg>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Custom Dark Switch Component
+function CustomSwitch({
+  isOn,
+  onToggle,
+  label,
+  disabled = false,
+}: {
+  isOn: boolean;
+  onToggle: () => void;
+  label: string;
+  disabled?: boolean;
+}) {
+  const handleToggle = () => {
+    if (!disabled) {
+      playClickSound();
+      onToggle();
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center space-y-3">
+      <motion.label
+        className="relative cursor-pointer"
+        whileTap={!disabled ? { scale: 0.95 } : {}}
+      >
+        <input
+          type="checkbox"
+          checked={isOn}
+          onChange={handleToggle}
+          disabled={disabled}
+          className="sr-only"
+        />
+        <div
+          className={cn(
+            "relative w-24 h-11 rounded-md border-2 border-black transition-all duration-400",
+            "bg-black",
+            isOn
+              ? "shadow-[inset_0px_0px_1px_0px_rgba(0,0,0,1),inset_-85px_0px_50px_-50px_rgba(1,78,4,0.6)]"
+              : "shadow-[inset_0px_0px_1px_0px_rgba(0,0,0,1),inset_90px_0px_50px_-50px_rgba(126,4,4,0.56)]",
+            disabled && "opacity-50 cursor-not-allowed"
+          )}
+          style={{
+            boxShadow: isOn
+              ? "inset 0px 0px 1px 0px rgba(0, 0, 0, 1), inset -85px 0px 50px -50px rgba(1, 78, 4, 0.6)"
+              : "inset 0px 0px 1px 0px rgba(0, 0, 0, 1), inset 90px 0px 50px -50px rgba(126, 4, 4, 0.56)",
+          }}
+        >
+          <motion.div
+            className={cn(
+              "absolute top-0.5 bottom-0.5 left-0.5 w-8 rounded-sm border border-gray-600",
+              "bg-gradient-to-b from-gray-800 to-gray-900",
+              "flex items-center justify-around",
+              "shadow-[0px_10px_5px_1px_rgba(0,0,0,0.15)]"
+            )}
+            animate={{
+              x: isOn ? "58px" : "0px",
+              boxShadow: isOn
+                ? "0px 10px 5px 1px rgba(0, 0, 0, 0.15), inset -10px 0px 10px -5px rgba(1, 112, 4, 0.1)"
+                : "0px 10px 5px 1px rgba(0, 0, 0, 0.15), inset 10px 0px 10px -5px rgba(126, 4, 4, 0.1)",
+            }}
+            transition={{ duration: 0.4, ease: [0.99, 0.1, 0.1, 0.99] }}
+          >
+            {/* Light indicator */}
+            <div
+              className={cn(
+                "w-1 h-1 rounded-full border border-gray-800 transition-all duration-400",
+                isOn
+                  ? "bg-green-500 shadow-[0px_0px_10px_0px_rgb(57,230,14)]"
+                  : "bg-red-500 shadow-[0px_0px_10px_1px_rgb(241,28,28)]"
+              )}
+            />
+
+            {/* Texture lines */}
+            <div className="w-0.5 h-5 bg-gray-900 shadow-[-0.7px_-1.5px_1px_0px_rgba(192,192,192,0.3),0px_2px_3px_rgba(0,0,0,0.3)]" />
+            <div className="w-0.5 h-5 bg-gray-900 shadow-[-0.7px_-1.5px_1px_0px_rgba(192,192,192,0.3),0px_2px_3px_rgba(0,0,0,0.3)]" />
+            <div className="w-0.5 h-5 bg-gray-900 shadow-[-0.7px_-1.5px_1px_0px_rgba(192,192,192,0.3),0px_2px_3px_rgba(0,0,0,0.3)]" />
+
+            {/* Light indicator */}
+            <div
+              className={cn(
+                "w-1 h-1 rounded-full border border-gray-800 transition-all duration-400",
+                isOn
+                  ? "bg-green-500 shadow-[0px_0px_10px_0px_rgb(57,230,14)]"
+                  : "bg-red-500 shadow-[0px_0px_10px_1px_rgb(241,28,28)]"
+              )}
+            />
+          </motion.div>
+        </div>
+      </motion.label>
+
+      <Badge
+        variant={isOn ? "default" : "secondary"}
+        className="text-xs bg-gray-800 text-gray-300 border-gray-700"
+      >
+        {label}
+      </Badge>
+    </div>
+  );
+}
+
+// Cover Component
+function ModernCover() {
+  return (
+    <motion.div
+      className="relative h-32 w-32 rounded-full"
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -40, opacity: 0 }}
+    >
+      {/* Glass Dome */}
+      <div className="h-full w-full rounded-full bg-gradient-to-br from-gray-300/80 to-gray-400/60 backdrop-blur-sm border-2 border-gray-400/50 shadow-xl">
+        {/* Reflection */}
+        <div className="absolute top-2 left-4 h-6 w-3 rounded-full bg-white/40 blur-sm" />
+        <div className="absolute top-6 right-6 h-3 w-2 rounded-full bg-white/30 blur-sm" />
+      </div>
+
+      {/* Base */}
+      <div className="absolute -bottom-1 left-1/2 h-3 w-16 -translate-x-1/2 rounded-b-lg bg-gradient-to-b from-gray-600 to-gray-700 border-2 border-gray-800" />
+    </motion.div>
+  );
 }
 
 export function ModernIncandescentPuzzle() {
@@ -68,8 +364,6 @@ export function ModernIncandescentPuzzle() {
   const [showInstructions, setShowInstructions] = useState(true);
   const [showAnswerSelection, setShowAnswerSelection] = useState(false);
   const [currentStreak, setCurrentStreak] = useState(0);
-  const [particles, setParticles] = useState<Particle[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
   // Game stats
   const [gameStats, setGameStats] = useState<GameStats>({
@@ -91,48 +385,32 @@ export function ModernIncandescentPuzzle() {
     easy: {
       warmTime: 15,
       minOnTime: 1000,
-      name: "Novice",
-      color: "bg-green-500",
+      name: "Beginner",
+      color: "bg-green-600",
       multiplier: 1,
     },
     medium: {
       warmTime: 10,
       minOnTime: 2000,
-      name: "Detective",
-      color: "bg-yellow-500",
+      name: "Intermediate",
+      color: "bg-blue-600",
       multiplier: 1.5,
     },
     hard: {
       warmTime: 6,
       minOnTime: 3000,
-      name: "Expert",
-      color: "bg-orange-500",
+      name: "Advanced",
+      color: "bg-orange-600",
       multiplier: 2,
     },
     expert: {
       warmTime: 4,
       minOnTime: 4000,
-      name: "Master",
-      color: "bg-red-500",
+      name: "Expert",
+      color: "bg-red-600",
       multiplier: 3,
     },
   };
-
-  // Initialize client-side particles to avoid hydration mismatch
-  useEffect(() => {
-    setIsClient(true);
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < 50; i++) {
-      newParticles.push({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        duration: 4 + Math.random() * 4,
-        delay: Math.random() * 2,
-      });
-    }
-    setParticles(newParticles);
-  }, []);
 
   // Initialize game
   const initializeGame = useCallback(() => {
@@ -198,453 +476,395 @@ export function ModernIncandescentPuzzle() {
     if (gamePhase !== "playing" || correctSwitch === null) return;
 
     const isCorrectSwitchOn = switchStates[correctSwitch];
-    const settings = difficultySettings[difficulty];
+    const correctSwitchOnTime = switchOnTimeRef.current;
 
     if (isCorrectSwitchOn) {
-      if (bulbState !== "on") {
-        setBulbState("on");
+      if (!correctSwitchOnTime) {
         switchOnTimeRef.current = Date.now();
       }
+      setBulbState("on");
     } else {
-      if (bulbState === "on" && switchOnTimeRef.current) {
-        const timeElapsed = Date.now() - switchOnTimeRef.current;
-
-        if (timeElapsed >= settings.minOnTime) {
-          const warmTime = Math.min(timeElapsed / 1000, settings.warmTime);
+      if (correctSwitchOnTime) {
+        const timeOn = Date.now() - correctSwitchOnTime;
+        if (timeOn >= difficultySettings[difficulty].minOnTime) {
           setBulbState("warm");
-          setWarmTimeRemaining(warmTime);
+          setWarmTimeRemaining(difficultySettings[difficulty].warmTime);
         } else {
           setBulbState("off");
         }
         switchOnTimeRef.current = null;
-      } else if (bulbState === "on") {
+      } else {
         setBulbState("off");
-        switchOnTimeRef.current = null;
       }
     }
   }, [switchStates, correctSwitch, gamePhase, difficulty]);
 
-  const toggleSwitch = useCallback(
-    (index: number) => {
-      if (gamePhase !== "playing") return;
-
-      setSwitchStates((prev) => {
-        const newStates = [...prev];
-        newStates[index] = !newStates[index];
-        return newStates;
-      });
-    },
-    [gamePhase]
-  );
-
-  const liftCover = useCallback(() => {
+  // Handle switch toggle
+  const handleSwitchToggle = (index: number) => {
     if (gamePhase !== "playing") return;
 
+    setSwitchStates((prev) => {
+      const newStates = [...prev];
+      newStates[index] = !newStates[index];
+      return newStates;
+    });
+  };
+
+  // Lift cover
+  const liftCover = () => {
+    if (gamePhase !== "playing") return;
     setIsCovered(false);
     setGamePhase("revealed");
-    setShowAnswerSelection(true);
 
-    // Stop game timer
+    setTimeout(() => {
+      setShowAnswerSelection(true);
+    }, 1500);
+  };
+
+  // Make guess
+  const makeGuess = (guessIndex: number) => {
+    if (gamePhase !== "revealed" || correctSwitch === null) return;
+
+    setSelectedSwitch(guessIndex);
+    const correct = guessIndex === correctSwitch;
+    setIsCorrect(correct);
+    setGamePhase("completed");
+    setShowAnswerSelection(false);
+
+    // Play sound effect
+    if (correct) {
+      playSuccessSound();
+    } else {
+      playErrorSound();
+    }
+
+    // Clear game timer
     if (gameTimerRef.current) {
       clearInterval(gameTimerRef.current);
     }
-  }, [gamePhase]);
 
-  const makeGuess = useCallback(
-    (index: number) => {
-      if (gamePhase !== "revealed" || selectedSwitch !== null) return;
-
-      setSelectedSwitch(index);
-      const correct = index === correctSwitch;
-      setIsCorrect(correct);
-      setShowAnswerSelection(false);
-      setGamePhase("completed");
-
-      // Calculate score
-      const baseScore = 100;
+    // Calculate score
+    if (correct) {
       const timeBonus = Math.max(0, 60 - timeElapsed) * 2;
-      const difficultyBonus =
-        baseScore * (difficultySettings[difficulty].multiplier - 1);
-      const finalScore = correct
-        ? Math.round(baseScore + timeBonus + difficultyBonus)
-        : 0;
+      const difficultyBonus = difficultySettings[difficulty].multiplier;
+      const roundScore = Math.round((100 + timeBonus) * difficultyBonus);
+      setScore(roundScore);
+      setCurrentStreak((prev) => prev + 1);
+    } else {
+      setCurrentStreak(0);
+    }
 
-      setScore(finalScore);
+    // Update stats
+    setGameStats((prev) => ({
+      totalAttempts: prev.totalAttempts + 1,
+      correctGuesses: prev.correctGuesses + (correct ? 1 : 0),
+      averageTime: Math.round(
+        (prev.averageTime * prev.totalAttempts + timeElapsed) /
+          (prev.totalAttempts + 1)
+      ),
+      highScore: Math.max(prev.highScore, correct ? score : 0),
+      streakCount: Math.max(
+        prev.streakCount,
+        currentStreak + (correct ? 1 : 0)
+      ),
+    }));
+  };
 
-      // Update stats
-      setGameStats((prev) => {
-        const newStats = {
-          totalAttempts: prev.totalAttempts + 1,
-          correctGuesses: prev.correctGuesses + (correct ? 1 : 0),
-          averageTime:
-            (prev.averageTime * prev.totalAttempts + timeElapsed) /
-            (prev.totalAttempts + 1),
-          highScore: Math.max(prev.highScore, finalScore),
-          streakCount: correct ? prev.streakCount + 1 : 0,
-        };
-        return newStats;
-      });
-
-      if (correct) {
-        setCurrentStreak((prev) => prev + 1);
-      } else {
-        setCurrentStreak(0);
-      }
-    },
-    [gamePhase, selectedSwitch, correctSwitch, timeElapsed, difficulty]
-  );
-
-  const resetGame = useCallback(() => {
+  // Reset game
+  const resetGame = () => {
     initializeGame();
-  }, [initializeGame]);
+  };
 
-  // Initialize game on mount
-  useEffect(() => {
+  // Start game
+  const startGame = () => {
+    setShowInstructions(false);
     initializeGame();
-  }, [initializeGame]);
+  };
 
-  // Cleanup
-  useEffect(() => {
-    return () => {
-      if (warmTimerRef.current) clearInterval(warmTimerRef.current);
-      if (gameTimerRef.current) clearInterval(gameTimerRef.current);
-    };
-  }, []);
+  if (showInstructions) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-2">
+        <div className="mx-auto max-w-7xl h-full">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-4"
+          >
+            <h1 className="text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+              <Lightbulb className="h-12 w-12 text-yellow-500" />
+              Light Switch Puzzle
+            </h1>
+            <p className="text-2xl text-gray-300">
+              A classic logic puzzle with a modern twist
+            </p>
+          </motion.div>
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-blue-950 to-purple-950 relative overflow-hidden">
-      {/* Animated background particles */}
-      {isClient && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {particles.map((particle) => (
-            <motion.div
-              key={particle.id}
-              className="absolute w-1 h-1 bg-white/20 rounded-full"
-              style={{
-                left: `${particle.left}%`,
-                top: `${particle.top}%`,
-              }}
-              animate={{
-                y: [-20, 20, -20],
-                opacity: [0.2, 0.8, 0.2],
-                scale: [0.5, 1.2, 0.5],
-              }}
-              transition={{
-                duration: particle.duration,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: particle.delay,
-              }}
-            />
-          ))}
-        </div>
-      )}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="h-full"
+          >
+            <Card className="mb-4 bg-gray-800 border-gray-700 h-full">
+              <CardContent className="p-8">
+                <h2 className="text-3xl font-semibold mb-6 text-center text-white">
+                  How to Play
+                </h2>
 
-      <div className="relative z-10 mx-auto max-w-7xl p-4">
-        {/* Header */}
-        <motion.div
-          className="text-center mb-8"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent mb-4">
-            Neural Illumination Challenge
-          </h1>
-          <p className="text-xl text-slate-300 mb-6">
-            Decode the mystery of the quantum light bulb using advanced
-            deduction techniques
-          </p>
-
-          {/* Stats Dashboard */}
-          <div className="flex justify-center gap-6 mb-6">
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-yellow-400" />
-                  <div className="text-left">
-                    <div className="text-lg font-bold text-white">
-                      {gameStats.highScore}
+                <div className="grid md:grid-cols-3 gap-8 mb-8">
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Zap className="h-10 w-10 text-white" />
                     </div>
-                    <div className="text-xs text-slate-400">High Score</div>
+                    <h3 className="font-semibold mb-3 text-white text-xl">
+                      1. Experiment
+                    </h3>
+                    <p className="text-gray-300 text-lg">
+                      Toggle the switches to test which one controls the hidden
+                      light bulb
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <Target className="w-5 h-5 text-green-400" />
-                  <div className="text-left">
-                    <div className="text-lg font-bold text-white">
-                      {gameStats.totalAttempts > 0
-                        ? Math.round(
-                            (gameStats.correctGuesses /
-                              gameStats.totalAttempts) *
-                              100
-                          )
-                        : 0}
-                      %
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Eye className="h-10 w-10 text-white" />
                     </div>
-                    <div className="text-xs text-slate-400">Success Rate</div>
+                    <h3 className="font-semibold mb-3 text-white text-xl">
+                      2. Reveal
+                    </h3>
+                    <p className="text-gray-300 text-lg">
+                      Lift the cover to see the bulb's state - lit, warm, or
+                      cold
+                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-400" />
-                  <div className="text-left">
-                    <div className="text-lg font-bold text-white">
-                      {currentStreak}
+                  <div className="text-center">
+                    <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Trophy className="h-10 w-10 text-white" />
                     </div>
-                    <div className="text-xs text-slate-400">Current Streak</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Difficulty Selector */}
-          <div className="flex justify-center gap-2 mb-6">
-            {(Object.keys(difficultySettings) as Difficulty[]).map((diff) => (
-              <Button
-                key={diff}
-                variant={difficulty === diff ? "default" : "outline"}
-                size="sm"
-                onClick={() => setDifficulty(diff)}
-                className={cn(
-                  "transition-all duration-300",
-                  difficulty === diff && difficultySettings[diff].color
-                )}
-                disabled={gamePhase === "playing" || gamePhase === "revealed"}
-              >
-                {difficultySettings[diff].name}
-              </Button>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Instructions Modal */}
-        <AnimatePresence>
-          {showInstructions && (
-            <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
-              <motion.div
-                className="m-4 max-w-4xl rounded-3xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-lg p-8 shadow-2xl ring-1 ring-white/10"
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-              >
-                <div className="mb-6 flex items-center gap-4">
-                  <div className="rounded-full bg-gradient-to-r from-blue-500 to-purple-500 p-4">
-                    <Brain className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold text-white">
-                      Neural Challenge Protocol
-                    </h2>
-                    <p className="text-slate-300">
-                      Master the art of quantum deduction
+                    <h3 className="font-semibold mb-3 text-white text-xl">
+                      3. Solve
+                    </h3>
+                    <p className="text-gray-300 text-lg">
+                      Choose which switch you think controls the bulb
                     </p>
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 text-slate-300">
-                  <div className="space-y-4">
-                    <div className="rounded-lg bg-slate-700/50 p-4">
-                      <h3 className="mb-3 font-semibold text-blue-400 flex items-center gap-2">
-                        <Lightbulb className="w-5 h-5" />
-                        Mission Objective
-                      </h3>
-                      <p className="text-sm leading-relaxed">
-                        One of three quantum switches controls a hidden photon
-                        emitter. Use advanced thermal analysis to identify the
-                        correct control mechanism through strategic
-                        manipulation.
-                      </p>
-                    </div>
-
-                    <div className="rounded-lg bg-slate-700/50 p-4">
-                      <h3 className="mb-3 font-semibold text-purple-400 flex items-center gap-2">
-                        <Zap className="w-5 h-5" />
-                        Operational Phases
-                      </h3>
-                      <ol className="space-y-2 text-sm">
-                        <li className="flex items-start gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            1
-                          </Badge>
-                          <span>
-                            Experiment with quantum switches to gather thermal
-                            data
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            2
-                          </Badge>
-                          <span>
-                            Deploy the revelation protocol to expose the photon
-                            state
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <Badge variant="outline" className="text-xs">
-                            3
-                          </Badge>
-                          <span>
-                            Execute final analysis and submit your hypothesis
-                          </span>
-                        </li>
-                      </ol>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div className="rounded-lg bg-slate-700/50 p-4">
-                      <h3 className="mb-3 font-semibold text-yellow-400 flex items-center gap-2">
-                        <Star className="w-5 h-5" />
-                        Photon States Analysis
-                      </h3>
-                      <ul className="space-y-3 text-sm">
-                        <li className="flex items-center gap-3">
-                          <div className="w-4 h-4 rounded-full bg-yellow-400 shadow-lg shadow-yellow-400/50"></div>
-                          <span>
-                            <strong>Full Emission:</strong> Target switch is
-                            actively engaged
-                          </span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <div className="w-4 h-4 rounded-full bg-orange-500 shadow-lg shadow-orange-500/50"></div>
-                          <span>
-                            <strong>Thermal Residue:</strong> Switch was engaged
-                            but now disengaged
-                          </span>
-                        </li>
-                        <li className="flex items-center gap-3">
-                          <div className="w-4 h-4 rounded-full bg-slate-500"></div>
-                          <span>
-                            <strong>Dormant State:</strong> Switch inactive or
-                            insufficient engagement time
-                          </span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="rounded-lg bg-slate-700/50 p-4">
-                      <h3 className="mb-3 font-semibold text-green-400 flex items-center gap-2">
-                        <Award className="w-5 h-5" />
-                        Difficulty Protocols
-                      </h3>
-                      <div className="space-y-2 text-sm">
-                        {(Object.keys(difficultySettings) as Difficulty[]).map(
-                          (diff) => (
-                            <div
-                              key={diff}
-                              className="flex items-center justify-between"
-                            >
-                              <span className="font-medium">
-                                {difficultySettings[diff].name}:
-                              </span>
-                              <div className="flex items-center gap-2">
-                                <span>
-                                  {difficultySettings[diff].warmTime}s thermal
-                                  retention
-                                </span>
-                                <Badge variant="outline" className="text-xs">
-                                  {difficultySettings[diff].multiplier}x
-                                  multiplier
-                                </Badge>
-                              </div>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                <div className="bg-yellow-900/30 border border-yellow-600/30 rounded-lg p-6 mb-8">
+                  <h4 className="font-semibold text-yellow-400 mb-3 text-xl">
+                    💡 Key Insight
+                  </h4>
+                  <p className="text-yellow-200 text-lg">
+                    Light bulbs stay warm for a short time after being turned
+                    off. Use this to deduce which switch controls the bulb even
+                    when it's not currently on!
+                  </p>
                 </div>
 
-                <div className="mt-8 flex justify-center">
+                <div className="text-center">
+                  <div className="mb-8">
+                    <label className="block text-lg font-medium text-gray-300 mb-4">
+                      Choose Difficulty
+                    </label>
+                    <div className="flex flex-wrap justify-center gap-4">
+                      {(Object.keys(difficultySettings) as Difficulty[]).map(
+                        (level) => (
+                          <button
+                            key={level}
+                            onClick={() => setDifficulty(level)}
+                            className={cn(
+                              "px-6 py-3 rounded-lg text-lg font-medium transition-all",
+                              difficulty === level
+                                ? "bg-blue-600 text-white shadow-md"
+                                : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                            )}
+                          >
+                            {difficultySettings[level].name}
+                          </button>
+                        )
+                      )}
+                    </div>
+                  </div>
+
                   <Button
                     size="lg"
-                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-lg font-semibold px-8"
-                    onClick={() => setShowInstructions(false)}
+                    onClick={startGame}
+                    className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white px-12 py-6 text-xl"
                   >
-                    <Brain className="mr-2 h-5 w-5" />
-                    Initialize Neural Interface
+                    <Play className="mr-3 h-6 w-6" />
+                    Start Playing
                   </Button>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </div>
+    );
+  }
 
-        {/* Main Game Area */}
-        <div className="grid gap-8 lg:grid-cols-2">
-          {/* Left Panel - Analysis Chamber */}
+  return (
+    <TooltipProvider>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black p-2">
+        <div className="mx-auto max-w-7xl h-full">
+          {/* Header */}
           <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-4 text-center"
           >
-            <Card className="border-slate-700 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm">
-              <CardContent className="p-8">
-                <div className="flex flex-col items-center">
-                  <div className="flex items-center justify-between w-full mb-6">
-                    <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-                      Quantum Analysis Chamber
-                    </h2>
-                    <div className="flex items-center gap-4">
-                      {gamePhase === "playing" && (
-                        <div className="flex items-center gap-2 text-slate-300">
-                          <Timer className="w-4 h-4" />
-                          <span className="font-mono">
-                            {Math.floor(timeElapsed / 60)}:
-                            {(timeElapsed % 60).toString().padStart(2, "0")}
-                          </span>
-                        </div>
-                      )}
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          "text-xs",
-                          difficultySettings[difficulty].color
-                        )}
-                      >
-                        {difficultySettings[difficulty].name}
-                      </Badge>
+            <h1 className="text-4xl font-bold text-white mb-3 flex items-center justify-center gap-3">
+              <Lightbulb className="h-10 w-10 text-yellow-500" />
+              Light Switch Puzzle
+            </h1>
+
+            <div className="flex items-center justify-center gap-8 text-gray-300">
+              <div className="flex items-center gap-2 text-lg">
+                <Timer className="h-5 w-5" />
+                <span>{timeElapsed}s</span>
+              </div>
+              <Badge
+                className={cn(
+                  "text-white text-lg px-4 py-1",
+                  difficultySettings[difficulty].color
+                )}
+              >
+                {difficultySettings[difficulty].name}
+              </Badge>
+              {currentStreak > 0 && (
+                <div className="flex items-center gap-2 text-lg">
+                  <Star className="h-5 w-5 text-yellow-500" />
+                  <span>Streak: {currentStreak}</span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
+          <div className="grid lg:grid-cols-12 gap-4 h-full">
+            {/* Game Stats - Left Column */}
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-3 space-y-4"
+            >
+              <Card className="bg-gray-800 border-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-4 text-center text-white text-lg">
+                    Your Stats
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Success Rate</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {gameStats.totalAttempts > 0
+                          ? Math.round(
+                              (gameStats.correctGuesses /
+                                gameStats.totalAttempts) *
+                                100
+                            )
+                          : 0}
+                        %
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">High Score</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {gameStats.highScore}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Best Streak</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {gameStats.streakCount}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Avg Time</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {gameStats.averageTime}s
+                      </span>
                     </div>
                   </div>
+                </CardContent>
+              </Card>
 
-                  {/* Photon Emitter Container */}
-                  <div className="relative mb-8 flex h-96 w-96 items-center justify-center">
-                    {/* Photon Emitter */}
+              <Card className="bg-gray-800 border-gray-700">
+                <CardContent className="p-6">
+                  <h3 className="font-semibold mb-4 text-center text-white text-lg">
+                    Difficulty Info
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Warm Time</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {difficultySettings[difficulty].warmTime}s
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-gray-400">Score Multiplier</span>
+                      <span className="font-bold text-gray-200 text-lg">
+                        {difficultySettings[difficulty].multiplier}x
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <div className="space-y-3">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowInstructions(true)}
+                  className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
+                  size="lg"
+                >
+                  <HelpCircle className="mr-2 h-5 w-5" />
+                  How to Play
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={resetGame}
+                  className="w-full bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700"
+                  disabled={gamePhase === "intro"}
+                  size="lg"
+                >
+                  <RotateCcw className="mr-2 h-5 w-5" />
+                  New Game
+                </Button>
+              </div>
+            </motion.div>
+
+            {/* Main Game Area - Center Column */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="lg:col-span-6 text-center"
+            >
+              <Card className="mb-4 bg-gray-800 border-gray-700 h-full">
+                <CardContent className="p-8 flex flex-col justify-center h-full">
+                  {/* Light Bulb Container */}
+                  <div className="relative mb-8 flex h-48 w-full items-center justify-center">
+                    {/* Light Bulb */}
                     <div className="absolute z-10">
                       <ModernLightBulb
                         state={isCovered ? "off" : bulbState}
                         warmPercentage={
-                          warmTimeRemaining /
-                          difficultySettings[difficulty].warmTime
+                          (warmTimeRemaining /
+                            difficultySettings[difficulty].warmTime) *
+                          100
                         }
                       />
                     </div>
 
-                    {/* Quantum Cover */}
+                    {/* Cover */}
                     <AnimatePresence>
                       {isCovered && (
                         <motion.div
                           className="absolute z-20"
-                          initial={{ y: -50, opacity: 0 }}
+                          initial={{ y: -20, opacity: 0 }}
                           animate={{ y: 0, opacity: 1 }}
-                          exit={{ y: -100, opacity: 0, rotateX: -10 }}
+                          exit={{ y: -40, opacity: 0 }}
                           transition={{
                             type: "spring",
                             stiffness: 200,
@@ -657,20 +877,20 @@ export function ModernIncandescentPuzzle() {
                     </AnimatePresence>
                   </div>
 
-                  {/* Thermal Analysis Display */}
+                  {/* Warm Time Display */}
                   {!isCovered && bulbState === "warm" && (
                     <motion.div
-                      className="mb-6 w-full max-w-md"
+                      className="mb-6 w-full max-w-md mx-auto"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                     >
-                      <Card className="bg-gradient-to-r from-orange-500/10 to-red-500/10 border-orange-500/30">
+                      <Card className="bg-gradient-to-r from-orange-900/60 to-red-900/60 border-orange-600">
                         <CardContent className="p-4">
-                          <div className="mb-2 flex items-center justify-between text-sm">
-                            <span className="text-orange-300 font-medium">
-                              Thermal Decay Analysis
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className="text-orange-300 font-semibold text-lg">
+                              Bulb is still warm!
                             </span>
-                            <span className="text-orange-200 font-mono">
+                            <span className="text-orange-200 font-mono text-lg">
                               {warmTimeRemaining.toFixed(1)}s
                             </span>
                           </div>
@@ -682,29 +902,28 @@ export function ModernIncandescentPuzzle() {
                             }
                             className="h-3"
                           />
-                          <div className="mt-2 text-xs text-orange-400/80">
-                            Residual photon energy detected • Quantum signature
-                            degrading
+                          <div className="mt-2 text-sm text-orange-400">
+                            The bulb was recently turned off
                           </div>
                         </CardContent>
                       </Card>
                     </motion.div>
                   )}
 
-                  {/* Game Status Display */}
+                  {/* Game Status */}
                   <div className="text-center w-full">
                     {gamePhase === "playing" && (
                       <div className="space-y-4">
-                        <p className="text-slate-300 text-lg">
-                          Manipulate quantum switches to gather thermal data
+                        <p className="text-gray-300 text-xl">
+                          Test the switches, then reveal the bulb
                         </p>
                         <Button
                           size="lg"
-                          className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 shadow-lg shadow-cyan-500/20"
                           onClick={liftCover}
+                          className="bg-gradient-to-r from-blue-600 to-purple-700 hover:from-blue-700 hover:to-purple-800 text-white shadow-lg px-8 py-4 text-lg"
                         >
-                          <Zap className="mr-2 h-5 w-5" />
-                          Deploy Revelation Protocol
+                          <Eye className="mr-2 h-6 w-6" />
+                          Lift Cover
                         </Button>
                       </div>
                     )}
@@ -714,38 +933,36 @@ export function ModernIncandescentPuzzle() {
                         className={cn(
                           "rounded-2xl p-6 text-center",
                           isCorrect
-                            ? "bg-gradient-to-r from-green-500/20 to-emerald-500/20 ring-1 ring-green-500/30"
-                            : "bg-gradient-to-r from-red-500/20 to-rose-500/20 ring-1 ring-red-500/30"
+                            ? "bg-gradient-to-r from-green-900/60 to-emerald-900/60 border-2 border-green-600"
+                            : "bg-gradient-to-r from-red-900/60 to-rose-900/60 border-2 border-red-600"
                         )}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                       >
                         <div className="mb-4 text-6xl">
-                          {isCorrect ? "🧠" : "⚡"}
+                          {isCorrect ? "🎉" : "😅"}
                         </div>
                         <h3 className="mb-3 text-2xl font-bold text-white">
-                          {isCorrect
-                            ? "Neural Pattern Recognized!"
-                            : "Quantum Interference Detected"}
+                          {isCorrect ? "Correct!" : "Try Again!"}
                         </h3>
-                        <p className="mb-4 text-lg text-slate-300">
+                        <p className="mb-4 text-gray-300 text-lg">
                           {isCorrect
-                            ? `Quantum Switch ${
+                            ? `Switch ${
                                 selectedSwitch + 1
-                              } confirmed as the primary control matrix!`
-                            : `Quantum Switch ${
+                              } was indeed the correct answer!`
+                            : `Switch ${
                                 correctSwitch !== null ? correctSwitch + 1 : ""
-                              } was the correct control matrix.`}
+                              } was the correct answer.`}
                         </p>
 
                         {isCorrect && (
                           <div className="mb-4 space-y-2">
-                            <div className="text-3xl font-bold text-yellow-400">
-                              +{score} Neural Points
+                            <div className="text-3xl font-bold text-blue-400">
+                              +{score} Points
                             </div>
-                            <div className="text-sm text-slate-400">
+                            <div className="text-gray-400">
                               Time Bonus: +{Math.max(0, 60 - timeElapsed) * 2} •
-                              Difficulty Multiplier:{" "}
+                              Difficulty:{" "}
                               {difficultySettings[difficulty].multiplier}x
                             </div>
                           </div>
@@ -753,10 +970,10 @@ export function ModernIncandescentPuzzle() {
 
                         <Button
                           onClick={resetGame}
-                          className="bg-gradient-to-r from-violet-500 to-purple-500 hover:from-violet-600 hover:to-purple-600"
+                          className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white px-6 py-3 text-lg"
                         >
-                          <RotateCcw className="mr-2 h-4 w-4" />
-                          Initialize New Sequence
+                          <RotateCcw className="mr-2 h-5 w-5" />
+                          Play Again
                         </Button>
                       </motion.div>
                     )}
@@ -767,14 +984,13 @@ export function ModernIncandescentPuzzle() {
                         animate={{ opacity: 1, y: 0 }}
                         className="w-full"
                       >
-                        <Card className="border-cyan-500/30 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 backdrop-blur-sm ring-1 ring-cyan-500/20">
+                        <Card className="border-blue-600 bg-gradient-to-br from-blue-900/60 to-purple-900/60">
                           <CardContent className="p-6">
-                            <h3 className="text-xl font-bold text-cyan-400 mb-4 text-center">
-                              Neural Analysis Complete - Submit Hypothesis
+                            <h3 className="text-xl font-bold text-blue-300 mb-4 text-center">
+                              Which switch controls the bulb?
                             </h3>
-                            <p className="mb-6 text-slate-300 text-center">
-                              Based on your quantum observations, which control
-                              matrix governs the photon emitter?
+                            <p className="mb-6 text-gray-300 text-center">
+                              Based on your observations, make your choice
                             </p>
                             <div className="grid grid-cols-3 gap-4">
                               {[0, 1, 2].map((index) => (
@@ -782,15 +998,15 @@ export function ModernIncandescentPuzzle() {
                                   key={index}
                                   variant="outline"
                                   size="lg"
-                                  className="h-20 border-cyan-500/30 bg-cyan-500/10 text-cyan-400 hover:bg-cyan-500/20 hover:border-cyan-400 transition-all duration-300"
+                                  className="h-20 border-blue-500 bg-gray-800/80 text-blue-300 hover:bg-blue-800/30 hover:border-blue-400 transition-all duration-300"
                                   onClick={() => makeGuess(index)}
                                 >
                                   <div className="text-center">
                                     <div className="text-xl font-bold mb-1">
-                                      Matrix {index + 1}
+                                      Switch {index + 1}
                                     </div>
-                                    <div className="text-xs opacity-75">
-                                      Submit Analysis
+                                    <div className="text-sm opacity-75">
+                                      Choose
                                     </div>
                                   </div>
                                 </Button>
@@ -801,96 +1017,40 @@ export function ModernIncandescentPuzzle() {
                       </motion.div>
                     )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-          {/* Right Panel - Control Matrix */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
-            className="space-y-6"
-          >
-            {/* Quantum Control Panel */}
-            <Card className="border-slate-700 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <h3 className="mb-6 text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent text-center">
-                  Quantum Control Matrix
-                </h3>
-                <div className="grid grid-cols-3 gap-8">
-                  {[0, 1, 2].map((index) => {
-                    const colors = ["blue", "green", "purple"];
-                    return (
-                      <TooltipProvider key={index}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <div className="flex justify-center">
-                              <ModernSwitch
-                                isOn={switchStates[index]}
-                                disabled={gamePhase !== "playing"}
-                                label={`Matrix ${index + 1}`}
-                                onClick={() => toggleSwitch(index)}
-                                glowColor={colors[index]}
-                                size="lg"
-                              />
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="bottom">
-                            {gamePhase !== "playing"
-                              ? "Quantum matrices locked during analysis phase"
-                              : "Toggle quantum control matrix"}
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            {/* Control Panel - Right Column */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:col-span-3"
+            >
+              <Card className="bg-gray-800 border-gray-700 h-full">
+                <CardContent className="p-6 flex flex-col justify-center h-full">
+                  <h3 className="mb-6 text-xl font-bold text-center text-white">
+                    Control Switches
+                  </h3>
 
-            {/* Neural Interface Panel */}
-            <Card className="border-slate-700 bg-gradient-to-br from-slate-800/50 to-slate-900/50 backdrop-blur-sm">
-              <CardContent className="p-6">
-                <h3 className="mb-4 text-lg font-bold text-purple-400 flex items-center gap-2">
-                  <Settings className="w-5 h-5" />
-                  Neural Interface
-                </h3>
-                <div className="space-y-4">
-                  <Button
-                    variant="outline"
-                    className="w-full border-slate-600 text-slate-300 hover:bg-slate-700"
-                    onClick={() => setShowInstructions(true)}
-                  >
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    View Operational Manual
-                  </Button>
-
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="bg-slate-700/30 rounded-lg p-3">
-                      <div className="text-slate-400 mb-1">Total Sessions</div>
-                      <div className="text-xl font-bold text-white">
-                        {gameStats.totalAttempts}
+                  <div className="space-y-8 flex-1 flex flex-col justify-center">
+                    {[0, 1, 2].map((index) => (
+                      <div key={index} className="text-center">
+                        <CustomSwitch
+                          isOn={switchStates[index]}
+                          onToggle={() => handleSwitchToggle(index)}
+                          label={`Switch ${index + 1}`}
+                          disabled={gamePhase !== "playing"}
+                        />
                       </div>
-                    </div>
-                    <div className="bg-slate-700/30 rounded-lg p-3">
-                      <div className="text-slate-400 mb-1">
-                        Avg. Analysis Time
-                      </div>
-                      <div className="text-xl font-bold text-white">
-                        {gameStats.averageTime > 0
-                          ? `${Math.round(gameStats.averageTime)}s`
-                          : "--"}
-                      </div>
-                    </div>
+                    ))}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
